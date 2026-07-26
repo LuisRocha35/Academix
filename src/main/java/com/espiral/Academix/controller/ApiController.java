@@ -1,8 +1,9 @@
 package com.espiral.Academix.controller;
 
 import com.espiral.Academix.service.CardService;
-import com.espiral.Academix.service.GeminiService;
+//import com.espiral.Academix.service.GeminiService;
 import com.espiral.Academix.service.PdfService;
+import com.espiral.Academix.interfaces.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,16 +26,26 @@ public class ApiController {
         }
     }
 
-    private GeminiService geminiService;
+    @Autowired
+    private AiService aiService;
 
-    /* @GetMapping("/testgemini")
-    public ResponseEntity<String> testarGemini() {
+    @GetMapping("/test-ia")
+    public ResponseEntity<String> testarIA() {
         try {
-            String prompt = "Diga apenas: 'Chave funcionando!' em português.";
-            String resposta = geminiService.generateContent(prompt);
-            return ResponseEntity.ok("✅ Resposta da IA: " + resposta);
+            String resposta = aiService.generateContent("Responda apenas com a frase exata: 'quantas copa do mundo o Brasil ja venceu'");
+            return ResponseEntity.ok("Resposta da IA: " + resposta);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("❌ Erro: " + e.getMessage());
+            return ResponseEntity.status(500).body("Erro ao conectar com a IA: " + e.getMessage());
         }
-    } */
+    }
+
+    @PostMapping("/gerar-Cards")
+    public ResponseEntity<String> gerarFlashcards(@RequestParam("file") MultipartFile file) {
+        try {
+            String respostaIA = cardService.gerarCardsDoPdf(file);
+            return ResponseEntity.ok(respostaIA);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao processar o arquivo: " + e.getMessage());
+        }
+    }
 }
