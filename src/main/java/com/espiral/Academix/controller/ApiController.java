@@ -27,7 +27,7 @@ public class ApiController {
 
     private GeminiService geminiService;
 
-    @GetMapping("/testgemini")
+    /* @GetMapping("/testgemini")
     public ResponseEntity<String> testarGemini() {
         try {
             String prompt = "Diga apenas: 'Chave funcionando!' em português.";
@@ -36,5 +36,5 @@ public class ApiController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("❌ Erro: " + e.getMessage());
         }
-    }
+    } */
 }
