@@ -1,5 +1,6 @@
 package com.espiral.Academix.controller;
 
+import com.espiral.Academix.service.CardService;
 import com.espiral.Academix.service.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class PdfController {
 
     @Autowired
-    private PdfService pdfService;
+    private CardService cardService;
 
     @PostMapping("/extract")
     public ResponseEntity<String> testExtraction(@RequestParam("file") MultipartFile file) {
         try {
-            String extractedText = pdfService.extractTextFromPdf(file);
+            String extractedText = cardService.extractTextFromPdf(file);
             return ResponseEntity.ok(extractedText);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao processar o arquivo: " + e.getMessage());
