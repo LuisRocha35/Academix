@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/pdf")
-public class PdfController {
+public class ApiController {
 
     @Autowired
     private CardService cardService;
