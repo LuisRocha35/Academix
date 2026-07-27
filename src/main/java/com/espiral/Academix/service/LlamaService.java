@@ -1,23 +1,32 @@
 package com.espiral.Academix.service;
 
-import com.espiral.Academix.interfaces.AiService;
+import com.espiral.Academix.interfaces.AiGenerator;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class LlamaService implements AiService {
+public class LlamaService implements AiGenerator {
 
     private final RestTemplate restTemplate;
-    private final String OLLAMA_URL = "http://localhost:11434/api/generate";
+    private final Dotenv dotenv;
+    private final String ollamaUrl;
 
-    public LlamaService() {
-        this.restTemplate = new RestTemplate();
+    public LlamaService(Dotenv dotenv) {
+        this.dotenv = dotenv;
+        this.ollamaUrl = dotenv.get("OLLAMA_API_URL", "http://localhost:11434/api/generate");
+
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000); // 5seg
+        factory.setReadTimeout(60000); //60seg
+        this.restTemplate = new RestTemplate(factory);
     }
 
     @Override
@@ -32,7 +41,7 @@ public class LlamaService implements AiService {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            Map response = restTemplate.postForObject(OLLAMA_URL, request, Map.class);
+            Map response = restTemplate.postForObject(this.ollamaUrl, request, Map.class);
             if (response != null && response.containsKey("response")) {
                 return response.get("response").toString();
             }

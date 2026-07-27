@@ -1,9 +1,7 @@
 package com.espiral.Academix.controller;
 
 import com.espiral.Academix.service.CardService;
-//import com.espiral.Academix.service.GeminiService;
-import com.espiral.Academix.service.PdfService;
-import com.espiral.Academix.interfaces.AiService;
+import com.espiral.Academix.interfaces.AiGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,12 +25,12 @@ public class ApiController {
     }
 
     @Autowired
-    private AiService aiService;
+    private AiGenerator aiGenerator;
 
     @GetMapping("/test-ia")
     public ResponseEntity<String> testarIA() {
         try {
-            String resposta = aiService.generateContent("Responda apenas com a frase exata: 'quantas copa do mundo o Brasil ja venceu'");
+            String resposta = aiGenerator.generateContent("Responda apenas com a frase exata: 'quantas copa do mundo o Brasil ja venceu'");
             return ResponseEntity.ok("Resposta da IA: " + resposta);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro ao conectar com a IA: " + e.getMessage());
