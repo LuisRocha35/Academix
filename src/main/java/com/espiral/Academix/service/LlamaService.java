@@ -33,6 +33,8 @@ public class LlamaService implements AiGenerator {
     public String generateContent(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
+        headers.set("ngrok-skip-browser-warning", "true");
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "llama3.2");
         requestBody.put("prompt", prompt);
