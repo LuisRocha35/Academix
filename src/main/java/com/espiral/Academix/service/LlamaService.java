@@ -40,6 +40,10 @@ public class LlamaService implements AiGenerator {
         requestBody.put("prompt", prompt);
         requestBody.put("stream", false);
 
+        Map<String, Object> options = new HashMap<>();
+        options.put("temperature", 0.0);
+        requestBody.put("options", options);
+
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {

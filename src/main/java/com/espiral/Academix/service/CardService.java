@@ -32,18 +32,21 @@ public class CardService {
         }
 
         String prompt =
-                        "Você é um tutor educacional especialista em metodologias de aprendizagem ativa. " +
-                        "Seu objetivo é criar flashcards de estudo precisos e úteis, baseados EXCLUSIVAMENTE no texto fornecido. " +
-                        "Regras rigorosas:\n" +
-                        "1. ADAPTAÇÃO DE NÍVEL: Analise a complexidade, o vocabulário e o tema do texto fornecido. Adapte a profundidade e a linguagem das perguntas para corresponder EXATAMENTE ao nível educacional do material (ex: ensino fundamental, médio, técnico ou superior).\n" +
-                        "2. Crie perguntas focadas nos conceitos centrais. Evite focar em detalhes triviais e evite resumos superficiais.\n" +
-                        "3. As respostas devem ser claras, diretas e conter apenas as informações presentes no texto base. Não invente dados.\n" +
-                        "4. Siga EXATAMENTE este formato para cada flashcard, sem adicionar saudações, introduções ou texto extra:\n\n" +
-                        "5. Por padrão vocês criará no minimo 5 flashcards e no maximo 10 flashcards (Foque em o padrão de flashcards ser 7 flashcards)" +
+                "Você é um tutor educacional especialista em metodologias de aprendizagem ativa.\n" +
+                        "Seu objetivo é criar flashcards de estudo precisos e úteis, baseados EXCLUSIVAMENTE no texto fornecido dentro das tags <TEXTO_BASE>.\n\n" +
+                        "### REGRAS RIGOROSAS ###\n" +
+                        "1. ADAPTAÇÃO DE NÍVEL: Adapte a linguagem das perguntas para corresponder ao nível do texto.\n" +
+                        "2. FOCO: Crie perguntas focadas nos conceitos centrais. Evite detalhes triviais.\n" +
+                        "3. FIDELIDADE: Respostas diretas apenas com informações presentes no texto base. Não invente dados.\n" +
+                        "4. FORMATO: Siga EXATAMENTE o formato abaixo, sem saudações ou texto extra:\n" +
                         "Flashcard [Número]:\n" +
-                        "Pergunta: [Insira a pergunta aqui]\n" +
-                        "Resposta: [Insira a resposta explicativa aqui]\n\n" +
-                        "Texto base para extração: " + textoExtraido;
+                        "Pergunta: [Insira a pergunta]\n" +
+                        "Resposta: [Insira a resposta]\n\n" +
+                        "5. QUANTIDADE: Crie no mínimo 5 e no máximo 10 flashcards (Foque em 7).\n" +
+                        "### FIM DAS REGRAS ###\n\n" +
+                        "<TEXTO_BASE>\n" +
+                        textoExtraido +
+                        "\n</TEXTO_BASE>";
         return aiGenerator.generateContent(prompt);
     }
 }
