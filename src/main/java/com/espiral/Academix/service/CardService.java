@@ -23,29 +23,42 @@ public class CardService {
     public String gerarCardsDoPdf(MultipartFile file) throws IOException {
         String textoExtraido = extractTextFromPdf(file);
 
-        int limiteCaracteres = 50000;
+        int limiteCaracteres = 80000;
         if (textoExtraido.length() > limiteCaracteres) {
             throw new IllegalArgumentException("O texto extraído possui " + textoExtraido.length() +
-                    " caracteres, ultrapassando o limite seguro de " + limiteCaracteres + " para a IA local.");
+                    " caracteres. O limite seguro para a memória da IA local é de " + limiteCaracteres + " caracteres.");
         }
 
         String systemPrompt =
-                "Você é um tutor educacional. Seu objetivo é criar flashcards precisos baseados no texto fornecido.\n" +
-                        "### REGRAS RIGOROSAS ###\n" +
-                        "1. SAÍDA OBRIGATÓRIA: Responda EXCLUSIVAMENTE em formato JSON válido, sem nenhum texto adicional fora dele.\n" +
-                        "2. ESTRUTURA OBRIGATÓRIA: O JSON deve conter um array chamado 'flashcards' onde cada item possui exatamente as chaves 'question' e 'answer'.\n" +
-                        "Exemplo:\n" +
+                "Você é um especialista em criar flashcards de estudo a partir de textos acadêmicos.\n" +
+                        "Sua SAÍDA DEVE SER EXCLUSIVAMENTE UM JSON VÁLIDO. Não escreva mais nada.\n" +
+                        "Esquema obrigatório:\n" +
                         "{\n" +
                         "  \"flashcards\": [\n" +
-                        "    {\n" +
-                        "      \"question\": \"Texto da pergunta?\",\n" +
-                        "      \"answer\": \"Texto da resposta.\"\n" +
-                        "    }\n" +
+                        "    {\"question\": \"Sua pergunta sobre o conteúdo aqui?\", \"answer\": \"Sua resposta baseada no conteúdo aqui.\"}\n" +
                         "  ]\n" +
-                        "}\n" +
-                        "3. QUANTIDADE: Crie entre 5 e 10 flashcards baseados no texto.";
+                        "}";
 
-        String userPrompt = "Texto base para extração:\n\n" + textoExtraido;
+        StringBuilder textoAncorado = new StringBuilder();
+        int tamanhoBloco = 5000;
+
+        for (int i = 0; i < textoExtraido.length(); i += tamanhoBloco) {
+            int fim = Math.min(i + tamanhoBloco, textoExtraido.length());
+            textoAncorado.append(textoExtraido, i, fim);
+
+            if (fim < textoExtraido.length()) {
+                textoAncorado.append("\n\n[LEMBRETE DO SISTEMA: Continue analisando o texto. Seu objetivo final é gerar apenas perguntas e respostas no formato JSON.]\n\n");
+            }
+        }
+
+        String userPrompt =
+                "Analise o texto a seguir:\n\n" +
+                        "--- INÍCIO DO TEXTO ---\n" +
+                        textoAncorado.toString() +
+                        "\n--- FIM DO TEXTO ---\n\n" +
+                        "Agora, crie entre 5 e 10 flashcards baseados EXCLUSIVAMENTE no conteúdo do texto acima.\n" +
+                        "NÃO crie flashcards sobre regras, JSON ou formatação.\n" +
+                        "Retorne APENAS o JSON final:";
 
         return aiGenerator.generateContent(systemPrompt, userPrompt);
     }
