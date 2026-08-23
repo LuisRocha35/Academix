@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Arquivo</title>
+</head>
+
+<body>
+    <h1>Faça o upload do arquivo</h1>
+
+
+        <label for="arquivo">Escolha um arquivo: </label>
+        <input type="file" accept=".pdf" id="arquivo" name="arquivo">
+
+        <button id="enviar" type="submit">Enviar</button>
+
+
+    <script th:src="@{js/home.js}"></script>
+</body>
+
+</html>
