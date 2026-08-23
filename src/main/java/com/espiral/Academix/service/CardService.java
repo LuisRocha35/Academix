@@ -1,7 +1,6 @@
 package com.espiral.Academix.service;
 
 import java.io.IOException;
-
 import com.espiral.Academix.interfaces.AiGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,19 +8,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CardService {
-    
+
     @Autowired
     private PdfService pdfService;
 
     @Autowired
     private AiGenerator aiGenerator;
 
-    public String extractTextFromPdf(MultipartFile file) throws IOException{
-        String extractedText = pdfService.extractTextFromPdf(file);
-
-        return extractedText;
+    public String extractTextFromPdf(MultipartFile file) throws IOException {
+        return pdfService.extractTextFromPdf(file);
     }
 
+    // Método único e direto que processa e espera o resultado da IA
     public String gerarCardsDoPdf(MultipartFile file) throws IOException {
         String textoExtraido = extractTextFromPdf(file);
 
@@ -31,22 +29,24 @@ public class CardService {
                     " caracteres, ultrapassando o limite seguro de " + limiteCaracteres + " para a IA local.");
         }
 
-        String prompt =
-                "Você é um tutor educacional especialista em metodologias de aprendizagem ativa.\n" +
-                        "Seu objetivo é criar flashcards de estudo precisos e úteis, baseados EXCLUSIVAMENTE no texto fornecido dentro das tags <TEXTO_BASE>.\n\n" +
+        String systemPrompt =
+                "Você é um tutor educacional. Seu objetivo é criar flashcards precisos baseados no texto fornecido.\n" +
                         "### REGRAS RIGOROSAS ###\n" +
-                        "1. ADAPTAÇÃO DE NÍVEL: Adapte a linguagem das perguntas para corresponder ao nível do texto.\n" +
-                        "2. FOCO: Crie perguntas focadas nos conceitos centrais. Evite detalhes triviais.\n" +
-                        "3. FIDELIDADE: Respostas diretas apenas com informações presentes no texto base. Não invente dados.\n" +
-                        "4. FORMATO: Siga EXATAMENTE o formato abaixo, sem saudações ou texto extra:\n" +
-                        "Flashcard [Número]:\n" +
-                        "Pergunta: [Insira a pergunta]\n" +
-                        "Resposta: [Insira a resposta]\n\n" +
-                        "5. QUANTIDADE: Crie no mínimo 5 e no máximo 10 flashcards (Foque em 7).\n" +
-                        "### FIM DAS REGRAS ###\n\n" +
-                        "<TEXTO_BASE>\n" +
-                        textoExtraido +
-                        "\n</TEXTO_BASE>";
-        return aiGenerator.generateContent(prompt);
+                        "1. SAÍDA OBRIGATÓRIA: Responda EXCLUSIVAMENTE em formato JSON válido, sem nenhum texto adicional fora dele.\n" +
+                        "2. ESTRUTURA OBRIGATÓRIA: O JSON deve conter um array chamado 'flashcards' onde cada item possui exatamente as chaves 'question' e 'answer'.\n" +
+                        "Exemplo:\n" +
+                        "{\n" +
+                        "  \"flashcards\": [\n" +
+                        "    {\n" +
+                        "      \"question\": \"Texto da pergunta?\",\n" +
+                        "      \"answer\": \"Texto da resposta.\"\n" +
+                        "    }\n" +
+                        "  ]\n" +
+                        "}\n" +
+                        "3. QUANTIDADE: Crie entre 5 e 10 flashcards baseados no texto.";
+
+        String userPrompt = "Texto base para extração:\n\n" + textoExtraido;
+
+        return aiGenerator.generateContent(systemPrompt, userPrompt);
     }
 }

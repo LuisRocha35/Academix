@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,32 +26,38 @@ public class LlamaService implements AiGenerator {
         this.ollamaUrl = dotenv.get("OLLAMA_API_URL", "http://localhost:11434/api/generate");
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(5000); // 5seg
-        factory.setReadTimeout(60000); //60seg
+        factory.setConnectTimeout(5000);
+        factory.setReadTimeout(300000);
         this.restTemplate = new RestTemplate(factory);
     }
 
     @Override
-    public String generateContent(String prompt) {
+    public String generateContent(String systemPrompt, String userPrompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         headers.set("ngrok-skip-browser-warning", "true");
+
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "llama3.2");
-        requestBody.put("prompt", prompt);
+        requestBody.put("system", systemPrompt);
+        requestBody.put("prompt", userPrompt);
         requestBody.put("stream", false);
+        requestBody.put("format", "json");
 
         Map<String, Object> options = new HashMap<>();
-        options.put("temperature", 0.0);
+        options.put("temperature", 0.1);
+        options.put("num_ctx", 8192);
         requestBody.put("options", options);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            Map response = restTemplate.postForObject(this.ollamaUrl, request, Map.class);
-            if (response != null && response.containsKey("response")) {
-                return response.get("response").toString();
+            String jsonResponse = restTemplate.postForObject(this.ollamaUrl, request, String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(jsonResponse);
+
+            if (root != null && root.has("response")) {
+                return root.get("response").asText();
             }
             return "Erro: Resposta vazia do modelo local.";
         } catch (Exception e) {
